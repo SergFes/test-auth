@@ -1,26 +1,36 @@
 import React from 'react'
-import logo from './logo.svg'
-import './App.css'
+import { connect } from 'react-redux'
+import T from 'prop-types'
 
-function App() {
+import './App.css'
+import { getToken } from './ducks/auth'
+import Loader from './components/Loader'
+
+const LazyLogin = React.lazy(() => import('./containers/Auth'))
+const LazyMainApp = React.lazy(() => import('./containers/MainApp'))
+
+function App({ auth }) {
+    if (auth === false) {
+        return (
+            <div className="App">
+                <React.Suspense fallback={<Loader />}>
+                    <LazyLogin />
+                </React.Suspense>
+            </div>
+        )
+    }
+
     return (
         <div className="App">
-            <header className="App-header">
-                <img src={logo} className="App-logo" alt="logo" />
-                <p>
-                    Edit <code>src/App.js</code> and save to reload.
-                </p>
-                <a
-                    className="App-link"
-                    href="https://reactjs.org"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                >
-                    Learn React
-                </a>
-            </header>
+            <React.Suspense fallback={<Loader />}>
+                <LazyMainApp />
+            </React.Suspense>
         </div>
     )
 }
 
-export default App
+export default connect(state => ({ auth: getToken(state) }))(App)
+
+App.propTypes = {
+    auth: T.any,
+}
